@@ -34,19 +34,19 @@ Major challenges we may face are finding keys to integrate the datasets, making 
 
 ### City of Seattle 
 
-+Crime dashboard: http://www.seattle.gov/police/information-and-data/crime-dashboard
++ Crime dashboard: http://www.seattle.gov/police/information-and-data/crime-dashboard
 
-+SPD Crime Data (e.g. Police Reports, both CSV and SODA API) https://data.seattle.gov/Public-Safety/Crime-Data/4fs7-3vj5
++ SPD Crime Data (e.g. Police Reports, both CSV and SODA API) https://data.seattle.gov/Public-Safety/Crime-Data/4fs7-3vj5
 
-+SPD Public Data: http://www.seattle.gov/police/information-and-data/public-data-sets
++ SPD Public Data: http://www.seattle.gov/police/information-and-data/public-data-sets
 
-+SODA: https://dev.socrata.com/
++ SODA: https://dev.socrata.com/
 
-+Comprehensive plan by Seattle OPCD: http://www.seattle.gov/opcd/ongoing-initiatives/comprehensive-plan#projectdocuments
++ Comprehensive plan by Seattle OPCD: http://www.seattle.gov/opcd/ongoing-initiatives/comprehensive-plan#projectdocuments
 
-+Seattle Services Portal https://cosaccela.seattle.gov/Portal/welcome.aspx
++ Seattle Services Portal https://cosaccela.seattle.gov/Portal/welcome.aspx
 
-+Seattle Business and Economic Development http://www.seattle.gov/services-and-information/business-and-economic-development
++ Seattle Business and Economic Development http://www.seattle.gov/services-and-information/business-and-economic-development
 
 ### King County
 
