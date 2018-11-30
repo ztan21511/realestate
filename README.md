@@ -23,7 +23,7 @@ Major challenges we may face are finding keys to integrate the datasets, making 
 ### Zillow / Google / WalkScore
 + (CSV) Zillow Research Data: https://www.zillow.com/research/data/
 
-+ Zillow Real Estate Data API: https://www.zillow.com/howto/api/APIOverview.html
++ Zillow Real Estate Data API: https://www.zillow.com/howto/api/APIOverview.htm
 
 + WalkScore API: https://www.walkscore.com/professional/walk-score-apis.php
 
