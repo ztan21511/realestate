@@ -1,0 +1,42 @@
+https://www.zillow.com/research/data/
+
+Zillow Home Value Index (ZHVI): A smoothed, seasonally adjusted measure of the
+median estimated home value across a given region and housing type.
+
+Home Values:
+Neighborhood_Zhvi_Summary_AllHomes.csv
+
+Use a dataset with "Region Names" set to neighborhood names.
+Filter state: WA.
+County: King County.
+Meanings of column names: ?
+
+Rents:
+Neighborhood_MedianRentalPrice_AllHomes.csv
+Filter state, county
+Units: USD/month
+
+Seasonal change!
+
+Crime data:
+We got the name of the neighborhood, and timestamps!
+
+
+Prototyping!
+
+What we want to present:
+1. Seasonal price changes
+2. Crime rate
+
+If we have one neighboorhood:
+1. Chart: seasonal price fluctuation
+2. Crime rate: a sum. A chart: Seasonal frequency changes
+
+If we have 2~5 neighboorhoods:
+1. Chart: all seasonal price fluctuations
+2. Crime rate: in a table. arrange(desc()). A chart of all seasonale crime rate
+   changes
+
+If we have >5 neighboorhoods:
+1. Chart: min and max for each month. Plot fluctuation ranges
+2. Crime rate: aggregation. A range in the chart.
