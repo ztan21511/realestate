@@ -48,8 +48,9 @@ server <- function (input, output) {
     output$salesPlot <- renderPlot({
         point <- get_points()
         if (nrow(point) > 0) {
-            ggplot(point) +
-                geom_line(aes(year_month, price, group=region, col=region)) +
+            ggplot(point %>% mutate(price_k=price / 1000)) +
+                geom_line(aes(year_month, price_k, group=region, col=region)) +
+                labs(x='Time', y='Price (Kilo USD)') +
                 theme(axis.text.x = element_text(angle = 45, hjust = 1))
         }
     })
