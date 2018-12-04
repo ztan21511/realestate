@@ -31,6 +31,30 @@ get_prices_for_neighboorhoods <- function (data, list_of_regions) {
     result
 }
 
+get_aggregate <- function (price_data) {
+    ## year_month  price  region
+    price_data %>%
+        group_by(year_month) %>%
+        summarize(min_price=min(price),
+                  max_price=max(price),
+                  median_price=median(price))
+}
+
+render_plot <- function (data, kilo) {
+    if (nrow(data) > 0) {
+        xlabel <- 'Time'
+        ylabel <- 'Price (USD)'
+        if (kilo) {
+            data <- mutate(data, price=price / 1000)
+            ylabel <- 'Price (Kilo USD)'
+        }
+        ggplot(data) +
+            geom_line(aes(year_month, price, group=region, col=region)) +
+            labs(x=xlabel, y=ylabel) +
+            theme(axis.text.x = element_text(angle = 45, hjust = 1))
+    }
+}
+
 
 server <- function (input, output) {
     get_all_names <- reactive({
@@ -51,23 +75,13 @@ server <- function (input, output) {
 
     output$salesPlot <- renderPlot({
         point <- get_points()
-        if (nrow(point) > 0) {
-            ggplot(point %>% mutate(price_k=price / 1000)) +
-                geom_line(aes(year_month, price_k, group=region, col=region)) +
-                labs(x='Time', y='Price (Kilo USD)') +
-                theme(axis.text.x = element_text(angle = 45, hjust = 1))
-        }
+        render_plot(point, TRUE)
     })
 
     output$rentPlot <- renderPlot({
         point <- get_prices_for_neighboorhoods(wa_rent_data,
                                                input$neighborhoodIn)
-        if (nrow(point) > 0) {
-            ggplot(point) +
-                geom_line(aes(year_month, price, group=region, col=region)) +
-                labs(x='Time', y='Price (USD)') +
-                theme(axis.text.x = element_text(angle = 45, hjust = 1))
-        }
+        render_plot(point, FALSE)
     })
 
     output$test <- renderText({
