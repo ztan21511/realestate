@@ -2,18 +2,23 @@ library(dplyr)
 library(shiny)
 library(data.table)
 library(tidyr)
+library(ggplot2)
 
-crime_rate_data <- fread('data/Crime_Data.csv')
-seasonal_price_data <- fread('data/Rent Price/Neighborhood_MedianRentalPrice_AllHomes.csv')
-wa_seasonal_price_data <- seasonal_price_data %>%
+wa_rent_data <-
+    fread('data/Rent Price/Neighborhood_MedianRentalPrice_AllHomes.csv') %>%
     filter(State == 'WA' & CountyName == 'King County')
+neighborhoods_rent <- wa_rent_data$RegionName %>% unique()
 
-get_prices_for_neighboorhoods <- function (list_of_regions) {
-    result <- data.frame(row.names=c('year_month', 'price', 'region'),
-                         stringsAsFactors=FALSE)
+wa_sales_data <-
+    fread('data/Home Values/Sale_Prices_Neighborhood.csv') %>%
+    filter(StateName == 'Washington')
+neighborhoods_sales <- wa_sales_data$RegionName %>% unique()
+
+get_prices_for_neighboorhoods <- function (data, list_of_regions) {
+    result <- data.frame(stringsAsFactors=FALSE)
 
     for (name in list_of_regions) {
-        row <- wa_seasonal_price_data %>%
+        row <- data %>%
             filter(RegionName == name) %>%
             head(1)
         point <- row %>%
@@ -27,14 +32,28 @@ get_prices_for_neighboorhoods <- function (list_of_regions) {
 }
 
 
-point <- get_prices_for_neighboorhoods(c('Downtown',
-                                         'Capitol Hill',
-                                         'Greenwood'))
-ggplot(point) +
-    geom_line(aes(year_month, price, group=region, col=region)) +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
 server <- function (input, output) {
+    output$neighborhoodOut <- renderUI({
+        selectInput('neighborhoodIn',
+                    'Select neighborhoods',
+                    multiple=TRUE,
+                    choices=c('(Select All)', neighborhoods_sales))
+    })
+
+    get_points <- reactive({
+        get_prices_for_neighboorhoods(wa_sales_data,
+                                      input$neighborhoodIn)
+    })
+
+    output$salesPlot <- renderPlot({
+        point <- get_points()
+        if (nrow(point) > 0) {
+            ggplot(point) +
+                geom_line(aes(year_month, price, group=region, col=region)) +
+                theme(axis.text.x = element_text(angle = 45, hjust = 1))
+        }
+    })
+
     output$test <- renderText({
         "Hello world!"
     })

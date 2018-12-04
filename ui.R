@@ -4,22 +4,18 @@ ui <- fluidPage(
     titlePanel('Exploring affordable housing options in Seattle'),
     sidebarLayout(
         sidebarPanel(
-            helpText('Data'),
-            selectInput('neighborhoodOut',
-                        'Select neighborhoods you are interested in',
-                        multiple=TRUE,
-                        choices=c('Soda', 'Cascade', 'Wallingford'))
+            helpText('See sales only, rent only or both?'),
+            uiOutput('neighborhoodOut'),
+            textOutput('debug')
         ),
         mainPanel(
             tabsetPanel(
                 type='tabs',
                 tabPanel(
-                    'Price fluctuation',
-                    helpText('Plot goes here!'),
-                    helpText('Table goes here!')
+                    'Rental price fluctuation',
+                    plotOutput('rentPlot')
                 ),
                 tabPanel(
-                    'Crime rate fluctutation',
-                    helpText('Plot goes here!'),
-                    helpText('Table goes here!')
+                    'Sales price fluctutation',
+                    plotOutput('salesPlot')
                 )))))
