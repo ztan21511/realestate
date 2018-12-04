@@ -33,11 +33,15 @@ get_prices_for_neighboorhoods <- function (data, list_of_regions) {
 
 
 server <- function (input, output) {
+    get_all_names <- reactive({
+        unique(c(neighborhoods_sales, neighborhoods_rent))
+    })
+
     output$neighborhoodOut <- renderUI({
         selectInput('neighborhoodIn',
                     'Select neighborhoods',
                     multiple=TRUE,
-                    choices=c('(Select All)', neighborhoods_sales))
+                    choices=c('(Select All)', get_all_names()))
     })
 
     get_points <- reactive({
@@ -51,6 +55,17 @@ server <- function (input, output) {
             ggplot(point %>% mutate(price_k=price / 1000)) +
                 geom_line(aes(year_month, price_k, group=region, col=region)) +
                 labs(x='Time', y='Price (Kilo USD)') +
+                theme(axis.text.x = element_text(angle = 45, hjust = 1))
+        }
+    })
+
+    output$rentPlot <- renderPlot({
+        point <- get_prices_for_neighboorhoods(wa_rent_data,
+                                                input$neighborhoodIn)
+        if (nrow(point) > 0) {
+            ggplot(point) +
+                geom_line(aes(year_month, price, group=region, col=region)) +
+                labs(x='Time', y='Price (USD)') +
                 theme(axis.text.x = element_text(angle = 45, hjust = 1))
         }
     })
