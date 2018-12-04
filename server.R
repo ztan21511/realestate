@@ -61,7 +61,7 @@ server <- function (input, output) {
 
     output$rentPlot <- renderPlot({
         point <- get_prices_for_neighboorhoods(wa_rent_data,
-                                                input$neighborhoodIn)
+                                               input$neighborhoodIn)
         if (nrow(point) > 0) {
             ggplot(point) +
                 geom_line(aes(year_month, price, group=region, col=region)) +
