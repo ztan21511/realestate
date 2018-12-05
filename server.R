@@ -140,13 +140,18 @@ server <- function (input, output) {
                                      )
     })
 
+    get_points_rent <- reactive({
+        get_prices_for_neighboorhoods(wa_rent_data,
+                                      input$neighborhoodIn, format(as.Date(input$dateRange), "%Y-%m"))
+    })
+
     output$salesPlot <- renderPlot({
         point <- get_points()
         render_plot(point, kilo=TRUE)
     })
 
     output$rentPlot <- renderPlot({
-        point <- get_points()
+        point <- get_points_rent()
         render_plot(point, kilo=FALSE)
     })
     
