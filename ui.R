@@ -1,5 +1,12 @@
+# Set-Up
+
 library(shiny)
 library(leaflet)
+
+#-------------------------------------------------------------------------------------------#
+#-------------------------------------------------------------------------------------------#
+
+# UI-Side
 
 ui <- navbarPage('Exploring real estate price variations in WA', 
                   id = "conditionedPanels",
