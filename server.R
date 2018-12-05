@@ -3,6 +3,8 @@ library(shiny)
 library(data.table)
 library(tidyr)
 library(ggplot2)
+library(sf)
+library(leaflet)
 
 wa_rent_data <-
     fread('data/Rent Price/Neighborhood_MedianRentalPrice_AllHomes.csv') %>%
@@ -13,6 +15,49 @@ wa_sales_data <-
     fread('data/Home Values/Sale_Prices_Neighborhood.csv') %>%
     filter(StateName == 'Washington')
 neighborhoods_sales <- wa_sales_data$RegionName %>% unique()
+
+spd_crime_beats_pre_2008 <- st_read(dsn="data/spdbeat_WGS84_pre2008/spdbeat_WGS84.shp", stringsAsFactors = FALSE) %>% 
+  mutate(begin_year=NA, end_year=2008)
+spd_crime_beats_2008_2015 <- st_read(dsn="data/SPD_BEATS_WGS84_2008-2015/SPD_BEATS_WGS84.shp", stringsAsFactors = FALSE) %>% 
+  mutate(begin_year=2008, end_year=2015)
+spd_crime_beats_2015_2017 <- st_read(dsn="data/SPD_BEATS_WGS84_2015-2017/SPD_BEATS_WGS84.shp", stringsAsFactors = FALSE) %>% 
+  mutate(begin_year=2015, end_year=2017) %>% 
+  rename(BEAT=beat)
+spd_crime_beats_2018_Present <- st_read(dsn="data/SPD_BEATS_WGS84_2018+/SPD_BEATS_WGS84.shp", stringsAsFactors = FALSE) %>% 
+  mutate(begin_year=2018, end_year=NA) %>% 
+  rename(BEAT=beat, SECTOR=sector)
+
+#spd_crime_beats_pre2008_Present <- 
+#  merge(merge(merge(spd_crime_beats_pre_2008, spd_crime_beats_2008_2015),
+#        spd_crime_beats_2015_2017),
+#        spd_crime_beats_2018_Present)
+
+#do.call(what= sf::rbind, args = list(spd_crime_beats_pre_2008, spd_crime_beats_2008_2015, spd_crime_beats_2015_2017, spd_crime_beats_2018_Present))
+spd_crime_beats_pre2008_Present <- mapedit:::combine_list_of_sf(list(spd_crime_beats_pre_2008, spd_crime_beats_2008_2015, spd_crime_beats_2015_2017, spd_crime_beats_2018_Present)) %>% 
+  select(PRECINCT, SECTOR, BEAT, begin_year, end_year, geometry)
+
+spd_mcpp_neighborhoods <- st_read(dsn='data/Seattle Police Micro-Community Policing Plans Neighborhoods/geo_export_29a19543-7dda-45bf-99f2-2be3980bb1e9.shp', stringsAsFactors = FALSE)
+
+spd_crime <- fread('data/Crime_data.csv') %>% 
+  left_join(spd_crime_beats_pre2008_Present, by=c("Beat"="BEAT")) 
+
+#use spatial intersection 
+#%>% 
+#  left_join(spd_mcpp_neighborhoods, by=c("Neighborhood"="name"))
+
+
+#BAF (demographics by school districts)
+
+#KCA (assessors office)
+
+#OFM
+seattleDemographics <- fread("data/sade_all_2000_to_2010/sade_all_2000_to_2010.csv", stringsAsFactors = FALSE) %>%
+  filter( ) %>% 
+  mutate( begin_year=2000, end_year=2010) %>% 
+  merge( fread("data/sade_all_2010_to_2017/sade_all_2010_to_2017.csv", stringsAsFactors = FALSE) %>%
+    filter() %>% 
+    mutate(begin_year=2010, end_year=2017))
+
 
 get_prices_for_neighboorhoods <- function (data, list_of_regions) {
     result <- data.frame(stringsAsFactors=FALSE)
@@ -102,6 +147,12 @@ server <- function (input, output) {
         render_plot(point, use_aggregate, kilo=FALSE)
     })
 
+    output$valueMap <- renderPlot({
+      
+      
+      
+    })
+    
     output$test <- renderText({
         "Hello world!"
     })

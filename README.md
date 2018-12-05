@@ -11,6 +11,28 @@ We will make an interactive report as a website using Shiny or Leaflet. Some Zil
 
 Major challenges we may face are finding keys to integrate the datasets, making efficient usage of our API limits for those resources that have them, the learning curves on new libraries, and knowing what exactly the algorithms found in relations between factors and prices. If someone were to ask why the system made a specific prediction, we may be able to provide a list of the features considered, but not why those features appear to be the most important to people historically (to show correlation, but not causation, and not to the degree some regulations might require for independent decision making).
 
+All the SPD crime beats (with spatial definitions), SPD MCPP (micro-community policing plans) neighborhood spatial definitions, crime data and are loaded.
+Crime beats for various periods are available, with some differences in column names. After mutating, they are all merged using an internal `sf` function ........... rather than merge or rbind. 
+
+US Census BAF (Block Assignment Files), TIGER/Line shapefiles and WA Office of Financial Management (OFM) SADE data are loaded to provide spatial demographic data and estimates by area.
+
+[Legacy King County GIS Portal with Data set *descriptions* (__links in `File Name` column links to descriptive MetaData, legacy download links have gone bad, download dataset through the new ArcGIS based portal__)]
+(https://www5.kingcounty.gov/sdc/TOC.aspx?subject=property)
+
+[King County ArcGIS based GeoPortal](https://gis-kingcounty.opendata.arcgis.com/)
+
+
+[King County Parcel Address Data Set](https://gis-kingcounty.opendata.arcgis.com/datasets/parcels-for-king-county-with-address-with-property-information--parcel-address-area/data)
+[King County - 2010 Census Tracts - Conflated to Parcels](https://gis-kingcounty.opendata.arcgis.com/datasets/2010-census-tracts-for-king-county-conflated-to-parcels-major-waterbodies-erased--tracts10-shore-area)
+
+Larger datasets are filtered down to spatially relevant sets using state, county, and geospatial factor levels.
+
+King County Assessor Data provides property details such as lot size, building details (sq. ft., buidling type (e.g. home or apt building), et c), and values. 
+
+Spatial Joins are used to combine the columns for crime precinct and beat, and demographic data with assessor data, which is then analyzed using Polynomial Multiple Regression with LASSO penalization to identify the most correlated features for the dependent variable Value from the Assessors Office data.
+
+Only the year independent variable is controlled by the user.
+
 ## Appendix
 ### Data sets we might use:
 + Real Estate Price Data From Zillow Research (Including Rent and Sale data)
@@ -37,11 +59,21 @@ Major challenges we may face are finding keys to integrate the datasets, making 
 ### United States Census 
 + Factfinder: https://factfinder.census.gov/faces/nav/jsf/pages/download_center.xhtml
 
++ US Census Bureau Block Assignment Files (BAF) Includes School Districts: https://www.census.gov/geo/maps-data/data/baf.html
+
+[Washington BAF](https://www2.census.gov/geo/docs/maps-data/data/baf/BlockAssign_ST53_WA.zip)
+[BAF Description](https://www.census.gov/geo/maps-data/data/baf_description.html)
+
+[Census TIGER/Line Shapefiles](https://www.census.gov/geo/maps-data/data/tiger-line.html)
+
 ### City of Seattle 
 
 + Crime dashboard: http://www.seattle.gov/police/information-and-data/crime-dashboard
 
 + SPD Crime Data (e.g. Police Reports, both CSV and SODA API) https://data.seattle.gov/Public-Safety/Crime-Data/4fs7-3vj5
+
++ SPD Police Beats (e.g. geographic locations on which police reports reported)
+https://data.seattle.gov/Public-Safety/Seattle-Police-Department-Beats/nnxn-434b
 
 + SPD Public Data: http://www.seattle.gov/police/information-and-data/public-data-sets
 
@@ -66,6 +98,11 @@ Major challenges we may face are finding keys to integrate the datasets, making 
 + King County Permitting Portal https://aca.accela.com/KINGCOUNTY/Default.aspx
 
 + King County general data portal https://data.kingcounty.gov/browse 
+
+### State of Washington
+
++ [Office of Financial Management Demographic Estimates (2000-2017)](https://www.ofm.wa.gov/washington-data-research/population-demographics/population-estimates/estimates-april-1-population-age-sex-race-and-hispanic-origin)
+
 
 ### ArcGIS / QGIS
 
