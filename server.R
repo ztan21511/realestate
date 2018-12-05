@@ -8,7 +8,6 @@ library(data.table)
 library(tidyr)
 library(ggplot2)
 library(leaflet)
-library(ggmap)
 wa_rent_data <-
     fread('data/Rent Price/Neighborhood_MedianRentalPrice_AllHomes.csv') %>%
     filter(State == 'WA')
