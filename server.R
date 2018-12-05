@@ -131,7 +131,7 @@ server <- function (input, output) {
                                     label = 'Date range input: yyyy-mm-dd',
                                     start = "2016-10-1", end = "2018-10-1",
                                     min = "2010-2-1", max = "2018-10-31",
-                                    format = "yyyy-mm"
+                                    format = "yyyy-mm", startview = "year"
                            )
     )
 
