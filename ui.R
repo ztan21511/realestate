@@ -7,6 +7,26 @@ ui <- navbarPage('Exploring real estate price variations in WA',
                             sidebarLayout(
                             sidebarPanel(
                                   helpText('See sales only, rent only or both?'),
+                                  tags$b('The purpose of this project is to 
+                                            observe the ever-changing real 
+                                         estate market in the state of 
+                                         Washington. The state of Washington 
+                                         consists of a variety of affluent 
+                                         neighborhoods that have real-estate
+                                         potential, and this app is targeted
+                                         towards users who want to choose 
+                                         particular areas in Washington that
+                                         they may invest in. Our app allows 
+                                         users to select specific neighborhoods
+                                         in Washington, observe the fluctuating
+                                         rental and sale prices in one 
+                                         neighborhood, and compare it to the 
+                                         other. This ultimately allows users to
+                                         discern which particular neighborhood 
+                                         would have a higher market potential. 
+                                         The source of our data comes from the
+                                         Zillow Home Value index (ZHVI) in the
+                                         form of CSV files                   '),
                                   radioButtons('datasetFilter', 'Dataset filter',
                                                c('Show all neighborhoods'='none',
                                                  'Have sales price data'='sales',
@@ -14,7 +34,9 @@ ui <- navbarPage('Exploring real estate price variations in WA',
                                                  'Have both datasets'='both'),
                                                selected='both'),
                                   uiOutput('neighborhoodOut'),
-                                  uiOutput('timeRangeOut')
+                                  uiOutput('timeRangeOut'),
+                                  tags$a("Zillow Data", href="https://www.zillow.com/research/data"),
+                                  tags$a("Source Code", href = "https://github.com/ztan21511/final-project-info201")
                             ),
                   
                             mainPanel(
