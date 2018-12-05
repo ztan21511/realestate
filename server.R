@@ -14,6 +14,9 @@ wa_sales_data <-
     filter(StateName == 'Washington')
 neighborhoods_sales <- wa_sales_data$RegionName %>% unique()
 
+all_neighborhoods <- unique(c(neighborhoods_sales, neighborhoods_rent))
+both_neighborhoods <- intersect(neighborhoods_sales, neighborhoods_rent)
+
 get_prices_for_neighboorhoods <- function (data, list_of_regions) {
     result <- data.frame(stringsAsFactors=FALSE)
 
@@ -75,7 +78,11 @@ render_ribbon <- function (data, ylabel) {
 
 server <- function (input, output) {
     get_all_names <- reactive({
-        unique(c(neighborhoods_sales, neighborhoods_rent))
+        switch(input$datasetFilter,
+               'none'=all_neighborhoods,
+               'both'=both_neighborhoods,
+               'sales'=neighborhoods_sales,
+               'rent'=neighborhoods_rent)
     })
 
     output$neighborhoodOut <- renderUI({

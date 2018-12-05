@@ -10,7 +10,7 @@ ui <- fluidPage(
                            'Have sales price data'='sales',
                            'Have rental price data'='rent',
                            'Have both datasets'='both'),
-                         selected='none'),
+                         selected='both'),
             uiOutput('neighborhoodOut'),
             textOutput('debug')
         ),
