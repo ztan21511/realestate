@@ -159,7 +159,7 @@ server <- function (input, output) {
     changeAnimation <- reactive({
       #print(input$frameWindow)
       sliderInput("animation",
-                  "Day",
+                  "Year",
                   #as.Date from https://stackoverflow.com/questions/40908808/how-to-sliderinput-for-dates
                   min = min(neighborhoodAvgSale$Yr),
                   #min = 0,
@@ -168,6 +168,7 @@ server <- function (input, output) {
                   #value = 0,
                   value = min(neighborhoodAvgSale$Yr),
                   step = 7,#day(input$frameWindow),
+                  sep ="",
                   animate = animationOptions(interval=1000, loop=TRUE))#, playButton=c("Play"), pauseButton=c("Pause")))
       
     })
@@ -181,8 +182,10 @@ server <- function (input, output) {
       YrAvgSale <- neighborhoodAvgSale %>% 
         filter(Yr == input$animation)
       
+      print(YrAvgSale)
+      
       ggplot() +
-        geom_sf(data=YrAvgSale, aes(fill=AvgSalePrice))
+        geom_sf(data=YrAvgSale, aes(fill=AvgSlPr))
     })
     
     

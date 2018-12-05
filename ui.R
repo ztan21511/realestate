@@ -38,8 +38,10 @@ ui <- navbarPage('Exploring real estate price variations in WA',
                     
                   tabPanel("Price History and Prediction Map",
                            
-                           leafletOutput("seattlePriceMap"),
-                           uiOutput("valueYrSlider")
+                           sidebarPanel(uiOutput("valueYrSlider")),
+                           #leafletOutput("seattlePriceMap"),
+                           mainPanel(plotOutput("ggplotMap"))
+                           
                            
                            
                   )
