@@ -127,3 +127,9 @@ server <- function (input, output) {
         render_plot(point, kilo=FALSE)
     })
 }
+
+## Histogram (we don't have enough data to plot this)
+## all_plotable_data <- wa_sales_data %>%
+##     get_prices_for_neighboorhoods(c('(Select All)')) %>%
+##     filter(year_month == '2018-01')
+## ggplot(all_plotable_data) + geom_histogram(aes(x=price))
