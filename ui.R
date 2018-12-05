@@ -12,7 +12,7 @@ ui <- fluidPage(
                            'Have both datasets'='both'),
                          selected='both'),
             uiOutput('neighborhoodOut'),
-            textOutput('debug')
+            uiOutput('timeRangeOut')
         ),
         mainPanel(
             tabsetPanel(

@@ -17,6 +17,11 @@ neighborhoods_sales <- wa_sales_data$RegionName %>% unique()
 all_neighborhoods <- unique(c(neighborhoods_sales, neighborhoods_rent))
 both_neighborhoods <- intersect(neighborhoods_sales, neighborhoods_rent)
 
+## full_date_range <- names(wa_sales_data) %>%
+##     tail(-4) %>%
+##     paste0('-01') %>%
+##     as.Date(format='%Y-%m-%d')
+
 get_prices_for_neighboorhoods <- function (data, list_of_regions) {
     result <- data.frame(stringsAsFactors=FALSE)
     if ('(Select All)' %in% list_of_regions) {
@@ -95,6 +100,17 @@ server <- function (input, output) {
                     choices=c('(Select All)', get_all_names()))
     })
 
+    ## output$timeRangeOut <- renderUI({
+    ##     min_date <- head(full_date_range, 1)
+    ##     max_date <- tail(full_date_range, 1)
+    ##     sliderInput('timeRangeIn',
+    ##                 'Select a time range',
+    ##                 min=min_date,
+    ##                 max=max_date,
+    ##                 value=c(min_date, max_date),
+    ##                 timeFormat='%Y-%m')
+    ## })
+
     get_points <- reactive({
         get_prices_for_neighboorhoods(wa_sales_data,
                                       input$neighborhoodIn)
@@ -109,9 +125,5 @@ server <- function (input, output) {
         point <- get_prices_for_neighboorhoods(wa_rent_data,
                                                input$neighborhoodIn)
         render_plot(point, kilo=FALSE)
-    })
-
-    output$test <- renderText({
-        "Hello world!"
     })
 }
