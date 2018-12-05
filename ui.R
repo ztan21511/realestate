@@ -35,6 +35,11 @@ ui <- navbarPage('Exploring real estate price variations in WA',
                                                selected='both'),
                                   uiOutput('neighborhoodOut'),
                                   uiOutput('timeRangeOut'),
+                                  helpText("Upon selecting six or more neighborhoods
+                                            for either rental or sale prices, the
+                                           visualization will evolve into a summary
+                                           trend line graph to indicate the overall
+                                           trend combining all selected neighborhoods"),
                                   tags$a("Zillow Data", href="https://www.zillow.com/research/data"),
                                   tags$a("Source Code", href = "https://github.com/ztan21511/final-project-info201")
                             ),
