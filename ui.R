@@ -3,7 +3,7 @@ library(leaflet)
 
 ui <- navbarPage('Exploring real estate price variations in WA', 
                   header=tags$style(type="text/css",
-                            ".recalculating {opacity: 1.0;}"), 
+                            ".recalculating {opacity: 0.75;}"), 
                   id = "conditionedPanels",
                   tabPanel("Real Estate Statistics",
                             sidebarLayout(
@@ -38,9 +38,12 @@ ui <- navbarPage('Exploring real estate price variations in WA',
                     
                   tabPanel("Price History and Prediction Map",
                            
-                           sidebarPanel(uiOutput("valueYrSlider")),
+                           sidebarPanel(uiOutput("valueYrSlider")#,
+                                        #uiOutput("PropertyClassSelect"),
+                                        #uiOutput("PropertyTypeSelect")
+                                        ),
                            #leafletOutput("seattlePriceMap"),
-                           mainPanel(plotOutput("ggplotMap"))
+                           mainPanel(plotOutput("ggplotMap", height="600px", width="400px"))
                            
                            
                            

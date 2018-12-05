@@ -17,7 +17,13 @@ wa_sales_data <-
     filter(StateName == 'Washington')
 neighborhoods_sales <- wa_sales_data$RegionName %>% unique()
 
-neighborhoodAvgSale <- st_read("data/neighborhoodAvgSale/neighborhoodAvgSale.shp")
+spd_mcpp_neighborhoods <- st_read(dsn='data/Seattle Police Micro-Community Policing Plans Neighborhoods/geo_export_29a19543-7dda-45bf-99f2-2be3980bb1e9.shp', stringsAsFactors = FALSE)
+
+neighborhoodAvgSale <- read.csv("data/neighborhoodAvgSale.csv", stringsAsFactors=FALSE)
+
+#types <- c(rbind(data.frame(val="All"), data.frame(val=levels(factor(neighborhoodAvgSale$HumanReadablePropertyType)))))
+
+#classes <- c(rbind(data.frame(val="All"), data.frame(val=levels(factor(neighborhoodAvgSale$HumanReadablePropertyClass)))))
 
 #OFM
 #seattleDemographics <- fread("data/sade_all_2000_to_2010/sade_all_2000_to_2010.csv", stringsAsFactors = FALSE) %>%
@@ -160,16 +166,12 @@ server <- function (input, output) {
       #print(input$frameWindow)
       sliderInput("animation",
                   "Year",
-                  #as.Date from https://stackoverflow.com/questions/40908808/how-to-sliderinput-for-dates
                   min = min(neighborhoodAvgSale$Yr),
-                  #min = 0,
                   max = max(neighborhoodAvgSale$Yr),
-                  #max = 10,
-                  #value = 0,
-                  value = min(neighborhoodAvgSale$Yr),
-                  step = 7,#day(input$frameWindow),
+                  value = 2018,
+                  step = 1,
                   sep ="",
-                  animate = animationOptions(interval=1000, loop=TRUE))#, playButton=c("Play"), pauseButton=c("Pause")))
+                  animate = animationOptions(interval=2000, loop=TRUE))
       
     })
     
@@ -177,15 +179,55 @@ server <- function (input, output) {
       changeAnimation()
     })
     
+    #output$PropertyTypeSelect <- renderUI({
+    #  selectInput("TypeSelect", label=h3("Property Type"),
+    #              choices=types,
+    #              selected=types[1],
+    #              selectize=FALSE)
+    #})
+    
+    #output$PropertyClassSelect <- renderUI({
+    #  selectInput("ClassSelect", label=h3("Property Class"),
+    #              choices=classes,
+    #              selected=classes[1],
+    #              selectize=FALSE)
+    #})
+    
     output$ggplotMap <- renderPlot({
       
+      req(input$animation)
+      #req(input$TypeSelect)
+      #req(input$ClassSelect)
+      
       YrAvgSale <- neighborhoodAvgSale %>% 
-        filter(Yr == input$animation)
+        filter(Yr > input$animation-1 & Yr < input$animation+1)
       
-      print(YrAvgSale)
+        #if(input$TypeSelect=="All"){
+        #  print("all")
+        #  YrAvgSale <- YrAvgSale %>%
+        #    group_by(name) %>% 
+        #    summarize(AvgSlPr = mean(AvgSlPr))
+          
+        #}else{
+        #  YrAvgSale <- YrAvgSale %>% 
+        #    filter(HumanReadablePropertyType == input$TypeSelect)
+        #}
       
-      ggplot() +
-        geom_sf(data=YrAvgSale, aes(fill=AvgSlPr))
+        #if(input$ClassSelect=="All"){
+        #  YrAvgSale <- YrAvgSale %>% 
+        #    group_by(name, HumanReadablePropertyType) %>% 
+        #    summarize(AvgSlPr = mean(AvgSlPr))
+        #}else{
+        #  YrAvgSale <- YrAvgSale %>% 
+        #    filter(HumanReadablePropertyClass == input$ClassSelect)
+        #}
+          
+        YrAvgSale <- spd_mcpp_neighborhoods %>% 
+          left_join(YrAvgSale, by=c("name"="name"))
+        
+        ggplot() +
+          geom_sf(data=YrAvgSale, aes(fill=AvgSlPr))
+          #geom_sf(data=spd_mcpp_neighborhoods)
     })
     
     

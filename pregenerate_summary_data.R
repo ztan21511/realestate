@@ -1,3 +1,12 @@
+library(dplyr)
+library(shiny)
+library(data.table)
+library(tidyr)
+library(ggplot2)
+library(sf)
+library(leaflet)
+library(rgeos)
+
 spd_crime_beats_pre_2008 <- st_read(dsn="data/spdbeat_WGS84_pre2008/spdbeat_WGS84.shp", stringsAsFactors = FALSE) %>% 
   mutate(begin_year=NA, end_year=2008, beat_end_year=paste(BEAT, 2008, sep = "-"))
 spd_crime_beats_2008_2015 <- st_read(dsn="data/SPD_BEATS_WGS84_2008-2015/SPD_BEATS_WGS84.shp", stringsAsFactors = FALSE) %>% 
@@ -45,7 +54,11 @@ spd_crime <- fread('data/Crime_data.csv') %>%
 
 #st_write(seattleAddress, "seattleAddresses_in_King_County__address_point.shp", driver="ESRI Shapefile")
 
-seattleAddress <- st_read("data/seattleAddresses_in_King_County__address_point/seattleAddresses_in_King_County__address_point.shp", stringsAsFactors=FALSE)
+seattleAddress <- st_read("data/seattleAddresses_in_King_County__address_point/seattleAddresses_in_King_County__address_point.shp", stringsAsFactors=FALSE) %>% 
+#filter for single family residential properties, rather than skewing or requiring
+#more work to ajust for rental prices as multi-family properties where the building
+#is very expensive, but each individual unit is some small fraction of that (and could fluctuate by market demand)
+  filter(SITETYPE == "R1")
 
 
 #MUST have LON and LAT to create sf
@@ -75,14 +88,33 @@ seattleAddressMCPP <- seattleAddressMCPP %>%
 saleHist <- fread("data/cd/EXTR_RPSale.csv", stringsAsFactors = FALSE) %>% 
   mutate(Parcel=paste(Major, Minor, sep = ""))
 
+propertyClass <- read.csv("data/PROPERTYCLASS.csv")
+propertyType <- read.csv("data/PROPERTYTYPE.csv")
+
 neighborhoodAvgSale <- saleHist %>% 
   left_join(seattleAddressMCPP, by=c("Parcel"="Parcel")) %>% 
+  #left_join(propertyType, by=c("PropertyType"="ID")) %>% 
+  #left_join(propertyClass, by=c("PropertyClass"="ID")) %>% 
   mutate(Yr = year(as.Date(DocumentDate, "%m/%d/%Y"))) %>% 
   filter(SalePrice != 0) %>% 
-  group_by(name, Yr, PropertyType, PropertyClass) %>% 
-  summarize(AvgSalePrice = mean(SalePrice)) %>% 
-  left_join(spd_mcpp_neighborhoods, by=c("name"="name"))
+  #select( -PropertyClass, -PropertyType) %>% 
+  #group_by(name, Yr, HumanReadablePropertyType, HumanReadablePropertyClass) %>% 
+  group_by(name, Yr) %>% 
+  summarize(AvgSlPr = mean(SalePrice))
+
+#allNeighborhoodAvgSale <- saleHist %>% 
+#  left_join(seattleAddressMCPP, by=c("Parcel"="Parcel")) %>% 
+#  mutate(HumanReadablePropertyType= "All") %>% 
+#  mutate(HumanReadablePropertyClass= "All") %>% 
+#  mutate(Yr = year(as.Date(DocumentDate, "%m/%d/%Y"))) %>% 
+#  filter(SalePrice != 0) %>% 
+#  select( -PropertyClass, -PropertyType) %>% 
+#  group_by(name, Yr) %>% 
+#  summarize(AvgSlPr = mean(SalePrice))
+
+#neighborhoodAvgSale <- mapedit:::combine_list_of_sf(list(neighborhoodAvgSale, allNeighborhoodAvgSale))
 
 rm(saleHist)
 
-st_write(neighborhoodAvgSale, "data/neighborhoodAvgSale", driver="ESRI Shapefile")
+#st_write(neighborhoodAvgSale, delete_dsn=TRUE, "data/neighborhoodAvgSale", driver="ESRI Shapefile")
+write.csv(neighborhoodAvgSale, file="data/neighborhoodAvgSale.csv")
