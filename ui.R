@@ -1,7 +1,7 @@
 library(shiny)
 
 ui <- fluidPage(
-    titlePanel('Exploring affordable housing options in Seattle'),
+    titlePanel('Exploring real estate price variations in WA'),
     sidebarLayout(
         sidebarPanel(
             helpText('See sales only, rent only or both?'),
