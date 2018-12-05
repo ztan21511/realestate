@@ -19,6 +19,9 @@ both_neighborhoods <- intersect(neighborhoods_sales, neighborhoods_rent)
 
 get_prices_for_neighboorhoods <- function (data, list_of_regions) {
     result <- data.frame(stringsAsFactors=FALSE)
+    if ('(Select All)' %in% list_of_regions) {
+        list_of_regions <- unique(data$RegionName)
+    }
 
     for (name in list_of_regions) {
         row <- data %>%
