@@ -35,7 +35,7 @@ ui <- navbarPage('Exploring real estate price variations in WA',
                   ),
                     
                   tabPanel("Leaflet Map",
-                           textOutput("Map goes here")
+                           leafletOutput("Map goes here")
                   )
                     
 )

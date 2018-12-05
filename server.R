@@ -1,14 +1,20 @@
+
+
+
+# Set up
 library(dplyr)
 library(shiny)
 library(data.table)
 library(tidyr)
 library(ggplot2)
 library(leaflet)
-
+library(ggmap)
 wa_rent_data <-
     fread('data/Rent Price/Neighborhood_MedianRentalPrice_AllHomes.csv') %>%
     filter(State == 'WA')
 neighborhoods_rent <- wa_rent_data$RegionName %>% unique()
+
+
 
 wa_sales_data <-
     fread('data/Home Values/Sale_Prices_Neighborhood.csv') %>%
@@ -17,6 +23,11 @@ neighborhoods_sales <- wa_sales_data$RegionName %>% unique()
 
 all_neighborhoods <- unique(c(neighborhoods_sales, neighborhoods_rent))
 both_neighborhoods <- intersect(neighborhoods_sales, neighborhoods_rent)
+
+#-------------------------------------------------------------------------#
+#-------------------------------------------------------------------------#
+
+# Functions:
 
 ## full_date_range <- names(wa_sales_data) %>%
 ##     tail(-4) %>%
@@ -84,6 +95,10 @@ render_ribbon <- function (data, ylabel) {
         theme(axis.text.x = element_text(angle = 45, hjust = 1))
 }
 
+#----------------------------------------------------------------------------#
+#----------------------------------------------------------------------------#
+
+#Shiny App Server Side:
 
 server <- function (input, output) {
     get_all_names <- reactive({
@@ -135,6 +150,12 @@ server <- function (input, output) {
         point <- get_points()
         render_plot(point, kilo=FALSE)
     })
+    
+    output$`Map goes here` <- renderLeaflet(
+      leaflet() %>%
+        setView(lng = -122.335167, lat = 47.608013, zoom = 11) %>%
+        addTiles()
+    )
 }
 
 ## Histogram (we don't have enough data to plot this)
