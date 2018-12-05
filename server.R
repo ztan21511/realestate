@@ -23,7 +23,7 @@ both_neighborhoods <- intersect(neighborhoods_sales, neighborhoods_rent)
 ##     paste0('-01') %>%
 ##     as.Date(format='%Y-%m-%d')
 
-get_prices_for_neighboorhoods <- function (data, list_of_regions) {
+get_prices_for_neighboorhoods <- function (data, list_of_regions, date) {
     result <- data.frame(stringsAsFactors=FALSE)
     if ('(Select All)' %in% list_of_regions) {
         list_of_regions <- unique(data$RegionName)
@@ -34,7 +34,7 @@ get_prices_for_neighboorhoods <- function (data, list_of_regions) {
             filter(RegionName == name) %>%
             head(1)
         point <- row %>%
-            select(`2016-10`:`2018-10`) %>%
+            select(date[1]:date[2]) %>%
             gather(year_month, price) %>%
             mutate(region=name)
         result <- rbind(result, point)
@@ -115,13 +115,15 @@ server <- function (input, output) {
     # Another way to get date range, might give it a try
     output$timeRangeOut <- renderUI(dateRangeInput('dateRange',
                                     label = 'Date range input: yyyy-mm-dd',
-                                    start = "2016-10-1", end = "2018-10-1"
+                                    start = "2016-10-1", end = "2018-10-1",
+                                    min = "2010-2-1", max = "2018-10-31"
                            )
     )
 
     get_points <- reactive({
         get_prices_for_neighboorhoods(wa_sales_data,
-                                      input$neighborhoodIn)
+                                      input$neighborhoodIn, format(as.Date(input$dateRange), "%Y-%m")
+                                     )
     })
 
     output$salesPlot <- renderPlot({
@@ -130,8 +132,7 @@ server <- function (input, output) {
     })
 
     output$rentPlot <- renderPlot({
-        point <- get_prices_for_neighboorhoods(wa_rent_data,
-                                               input$neighborhoodIn)
+        point <- get_points()
         render_plot(point, kilo=FALSE)
     })
 }
