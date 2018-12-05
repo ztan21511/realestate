@@ -125,7 +125,7 @@ server <- function (input, output) {
     ##                 value=c(min_date, max_date),
     ##                 timeFormat='%Y-%m')
     ## })
-    
+
     # Another way to get date range, might give it a try
     output$timeRangeOut <- renderUI(dateRangeInput('dateRange',
                                     label = 'Date range input: yyyy-mm-dd',
@@ -154,7 +154,7 @@ server <- function (input, output) {
         point <- get_points_rent()
         render_plot(point, kilo=FALSE)
     })
-    
+
     output$`Map goes here` <- renderLeaflet(
       leaflet() %>%
         setView(lng = -122.335167, lat = 47.608013, zoom = 11) %>%
