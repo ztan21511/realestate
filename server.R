@@ -40,7 +40,7 @@ get_aggregate <- function (price_data) {
                   median_price=median(price))
 }
 
-render_plot <- function (data, use_aggregate, kilo) {
+render_plot <- function (data, kilo) {
     if (nrow(data) > 0) {
         ## transform price unit, if necessary
         ylabel <- 'Median Price (USD)'
@@ -49,6 +49,7 @@ render_plot <- function (data, use_aggregate, kilo) {
             ylabel <- 'Median Price (Kilo USD)'
         }
         ## plot either individual lines or an aggregate
+        use_aggregate <- length(unique(data$region)) > 6
         f <- ifelse(use_aggregate, render_ribbon, render_individual_lines)
         f(data, ylabel)
     }
@@ -91,15 +92,13 @@ server <- function (input, output) {
 
     output$salesPlot <- renderPlot({
         point <- get_points()
-        use_aggregate <- length(input$neighborhoodIn) > 6
-        render_plot(point, use_aggregate, kilo=TRUE)
+        render_plot(point, kilo=TRUE)
     })
 
     output$rentPlot <- renderPlot({
         point <- get_prices_for_neighboorhoods(wa_rent_data,
                                                input$neighborhoodIn)
-        use_aggregate <- length(input$neighborhoodIn) > 6
-        render_plot(point, use_aggregate, kilo=FALSE)
+        render_plot(point, kilo=FALSE)
     })
 
     output$test <- renderText({
