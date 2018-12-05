@@ -5,10 +5,11 @@ library(tidyr)
 library(ggplot2)
 library(sf)
 library(leaflet)
+library(rgeos)
 
 wa_rent_data <-
     fread('data/Rent Price/Neighborhood_MedianRentalPrice_AllHomes.csv') %>%
-    filter(State == 'WA' & CountyName == 'King County')
+    filter(State == 'WA')
 neighborhoods_rent <- wa_rent_data$RegionName %>% unique()
 
 wa_sales_data <-
@@ -16,51 +17,29 @@ wa_sales_data <-
     filter(StateName == 'Washington')
 neighborhoods_sales <- wa_sales_data$RegionName %>% unique()
 
-spd_crime_beats_pre_2008 <- st_read(dsn="data/spdbeat_WGS84_pre2008/spdbeat_WGS84.shp", stringsAsFactors = FALSE) %>% 
-  mutate(begin_year=NA, end_year=2008)
-spd_crime_beats_2008_2015 <- st_read(dsn="data/SPD_BEATS_WGS84_2008-2015/SPD_BEATS_WGS84.shp", stringsAsFactors = FALSE) %>% 
-  mutate(begin_year=2008, end_year=2015)
-spd_crime_beats_2015_2017 <- st_read(dsn="data/SPD_BEATS_WGS84_2015-2017/SPD_BEATS_WGS84.shp", stringsAsFactors = FALSE) %>% 
-  mutate(begin_year=2015, end_year=2017) %>% 
-  rename(BEAT=beat)
-spd_crime_beats_2018_Present <- st_read(dsn="data/SPD_BEATS_WGS84_2018+/SPD_BEATS_WGS84.shp", stringsAsFactors = FALSE) %>% 
-  mutate(begin_year=2018, end_year=NA) %>% 
-  rename(BEAT=beat, SECTOR=sector)
-
-#spd_crime_beats_pre2008_Present <- 
-#  merge(merge(merge(spd_crime_beats_pre_2008, spd_crime_beats_2008_2015),
-#        spd_crime_beats_2015_2017),
-#        spd_crime_beats_2018_Present)
-
-#do.call(what= sf::rbind, args = list(spd_crime_beats_pre_2008, spd_crime_beats_2008_2015, spd_crime_beats_2015_2017, spd_crime_beats_2018_Present))
-spd_crime_beats_pre2008_Present <- mapedit:::combine_list_of_sf(list(spd_crime_beats_pre_2008, spd_crime_beats_2008_2015, spd_crime_beats_2015_2017, spd_crime_beats_2018_Present)) %>% 
-  select(PRECINCT, SECTOR, BEAT, begin_year, end_year, geometry)
-
-spd_mcpp_neighborhoods <- st_read(dsn='data/Seattle Police Micro-Community Policing Plans Neighborhoods/geo_export_29a19543-7dda-45bf-99f2-2be3980bb1e9.shp', stringsAsFactors = FALSE)
-
-spd_crime <- fread('data/Crime_data.csv') %>% 
-  left_join(spd_crime_beats_pre2008_Present, by=c("Beat"="BEAT")) 
-
-#use spatial intersection 
-#%>% 
-#  left_join(spd_mcpp_neighborhoods, by=c("Neighborhood"="name"))
-
-
-#BAF (demographics by school districts)
-
-#KCA (assessors office)
+neighborhoodAvgSale <- st_read("data/neighborhoodAvgSale/neighborhoodAvgSale.shp")
 
 #OFM
-seattleDemographics <- fread("data/sade_all_2000_to_2010/sade_all_2000_to_2010.csv", stringsAsFactors = FALSE) %>%
-  filter( ) %>% 
-  mutate( begin_year=2000, end_year=2010) %>% 
-  merge( fread("data/sade_all_2010_to_2017/sade_all_2010_to_2017.csv", stringsAsFactors = FALSE) %>%
-    filter() %>% 
-    mutate(begin_year=2010, end_year=2017))
+#seattleDemographics <- fread("data/sade_all_2000_to_2010/sade_all_2000_to_2010.csv", stringsAsFactors = FALSE) %>%
+#  filter( ) %>% 
+#  mutate( begin_year=2000, end_year=2010) %>% 
+#  merge( fread("data/sade_all_2010_to_2017/sade_all_2010_to_2017.csv", stringsAsFactors = FALSE) %>%
+#    filter() %>% 
+#    mutate(begin_year=2010, end_year=2017))
 
+all_neighborhoods <- unique(c(neighborhoods_sales, neighborhoods_rent))
+both_neighborhoods <- intersect(neighborhoods_sales, neighborhoods_rent)
+
+## full_date_range <- names(wa_sales_data) %>%
+##     tail(-4) %>%
+##     paste0('-01') %>%
+##     as.Date(format='%Y-%m-%d')
 
 get_prices_for_neighboorhoods <- function (data, list_of_regions) {
     result <- data.frame(stringsAsFactors=FALSE)
+    if ('(Select All)' %in% list_of_regions) {
+        list_of_regions <- unique(data$RegionName)
+    }
 
     for (name in list_of_regions) {
         row <- data %>%
@@ -85,7 +64,7 @@ get_aggregate <- function (price_data) {
                   median_price=median(price))
 }
 
-render_plot <- function (data, use_aggregate, kilo) {
+render_plot <- function (data, kilo) {
     if (nrow(data) > 0) {
         ## transform price unit, if necessary
         ylabel <- 'Median Price (USD)'
@@ -94,6 +73,7 @@ render_plot <- function (data, use_aggregate, kilo) {
             ylabel <- 'Median Price (Kilo USD)'
         }
         ## plot either individual lines or an aggregate
+        use_aggregate <- length(unique(data$region)) > 6
         f <- ifelse(use_aggregate, render_ribbon, render_individual_lines)
         f(data, ylabel)
     }
@@ -110,7 +90,7 @@ render_ribbon <- function (data, ylabel) {
     data <- get_aggregate(data)
     ggplot(data) +
         geom_ribbon(aes(year_month, ymin=min_price, ymax=max_price, group=1),
-                    fill='grey70') +
+                    fill='grey70', alpha=0.5) +
         geom_line(aes(year_month, median_price, group=2)) +
         labs(x='Time', y=ylabel) +
         theme(axis.text.x = element_text(angle = 45, hjust = 1))
@@ -119,7 +99,11 @@ render_ribbon <- function (data, ylabel) {
 
 server <- function (input, output) {
     get_all_names <- reactive({
-        unique(c(neighborhoods_sales, neighborhoods_rent))
+        switch(input$datasetFilter,
+               'none'=all_neighborhoods,
+               'both'=both_neighborhoods,
+               'sales'=neighborhoods_sales,
+               'rent'=neighborhoods_rent)
     })
 
     output$neighborhoodOut <- renderUI({
@@ -129,6 +113,24 @@ server <- function (input, output) {
                     choices=c('(Select All)', get_all_names()))
     })
 
+    ## output$timeRangeOut <- renderUI({
+    ##     min_date <- head(full_date_range, 1)
+    ##     max_date <- tail(full_date_range, 1)
+    ##     sliderInput('timeRangeIn',
+    ##                 'Select a time range',
+    ##                 min=min_date,
+    ##                 max=max_date,
+    ##                 value=c(min_date, max_date),
+    ##                 timeFormat='%Y-%m')
+    ## })
+    
+    # Another way to get date range, might give it a try
+    output$timeRangeOut <- renderUI(dateRangeInput('dateRange',
+                                    label = 'Date range input: yyyy-mm-dd',
+                                    start = Sys.Date() - 2, end = Sys.Date() + 2
+                           )
+    )
+
     get_points <- reactive({
         get_prices_for_neighboorhoods(wa_sales_data,
                                       input$neighborhoodIn)
@@ -136,8 +138,7 @@ server <- function (input, output) {
 
     output$salesPlot <- renderPlot({
         point <- get_points()
-        use_aggregate <- length(input$neighborhoodIn) > 6
-        render_plot(point, use_aggregate, kilo=TRUE)
+        render_plot(point, kilo=TRUE)
     })
 
     output$rentPlot <- renderPlot({
@@ -148,12 +149,50 @@ server <- function (input, output) {
     })
 
     output$valueMap <- renderPlot({
-      
+      #leaflet() %>%
+      #  addTiles() %>% 
+      #  fitBounds(~min())
       
       
     })
+    
+    changeAnimation <- reactive({
+      #print(input$frameWindow)
+      sliderInput("animation",
+                  "Day",
+                  #as.Date from https://stackoverflow.com/questions/40908808/how-to-sliderinput-for-dates
+                  min = min(neighborhoodAvgSale$Yr),
+                  #min = 0,
+                  max = max(neighborhoodAvgSale$Yr),
+                  #max = 10,
+                  #value = 0,
+                  value = min(neighborhoodAvgSale$Yr),
+                  step = 7,#day(input$frameWindow),
+                  animate = animationOptions(interval=1000, loop=TRUE))#, playButton=c("Play"), pauseButton=c("Pause")))
+      
+    })
+    
+    output$valueYrSlider <- renderUI({
+      changeAnimation()
+    })
+    
+    output$ggplotMap <- renderPlot({
+      
+      YrAvgSale <- neighborhoodAvgSale %>% 
+        filter(Yr == input$animation)
+      
+      ggplot() +
+        geom_sf(data=YrAvgSale, aes(fill=AvgSalePrice))
+    })
+    
     
     output$test <- renderText({
         "Hello world!"
     })
 }
+
+## Histogram (we don't have enough data to plot this)
+## all_plotable_data <- wa_sales_data %>%
+##     get_prices_for_neighboorhoods(c('(Select All)')) %>%
+##     filter(year_month == '2018-01')
+## ggplot(all_plotable_data) + geom_histogram(aes(x=price))
