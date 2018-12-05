@@ -3,6 +3,7 @@ library(shiny)
 library(data.table)
 library(tidyr)
 library(ggplot2)
+library(leaflet)
 
 wa_rent_data <-
     fread('data/Rent Price/Neighborhood_MedianRentalPrice_AllHomes.csv') %>%
@@ -110,6 +111,13 @@ server <- function (input, output) {
     ##                 value=c(min_date, max_date),
     ##                 timeFormat='%Y-%m')
     ## })
+    
+    # Another way to get date range, might give it a try
+    output$timeRangeOut <- renderUI(dateRangeInput('dateRange',
+                                    label = 'Date range input: yyyy-mm-dd',
+                                    start = Sys.Date() - 2, end = Sys.Date() + 2
+                           )
+    )
 
     get_points <- reactive({
         get_prices_for_neighboorhoods(wa_sales_data,
