@@ -5,6 +5,12 @@ ui <- fluidPage(
     sidebarLayout(
         sidebarPanel(
             helpText('See sales only, rent only or both?'),
+            radioButtons('datasetFilter', 'Dataset filter',
+                         c('Show all neighborhoods'='none',
+                           'Have sales price data'='sales',
+                           'Have rental price data'='rent',
+                           'Have both datasets'='both'),
+                         selected='none'),
             uiOutput('neighborhoodOut'),
             textOutput('debug')
         ),
