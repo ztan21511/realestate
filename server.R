@@ -77,7 +77,7 @@ render_ribbon <- function (data, ylabel) {
     data <- get_aggregate(data)
     ggplot(data) +
         geom_ribbon(aes(year_month, ymin=min_price, ymax=max_price, group=1),
-                    fill='grey70') +
+                    fill='grey70', alpha=0.5) +
         geom_line(aes(year_month, median_price, group=2)) +
         labs(x='Time', y=ylabel) +
         theme(axis.text.x = element_text(angle = 45, hjust = 1))
