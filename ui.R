@@ -13,8 +13,7 @@ ui <- navbarPage('Exploring real estate price variations in WA',
                   tabPanel("Real Estate Statistics",
                             sidebarLayout(
                             sidebarPanel(
-                                  helpText('See sales only, rent only or both?'),
-                                  tags$b('The purpose of this project is to
+                                  tags$p('The purpose of this project is to
                                             observe the ever-changing real
                                          estate market in the state of
                                          Washington. The state of Washington
@@ -34,6 +33,7 @@ ui <- navbarPage('Exploring real estate price variations in WA',
                                          The source of our data comes from the
                                          Zillow Home Value index (ZHVI) in the
                                          form of CSV files                   '),
+                                  helpText('See sales only, rent only or both?'),
                                   radioButtons('datasetFilter', 'Dataset filter',
                                                c('Show all neighborhoods'='none',
                                                  'Have sales price data'='sales',
