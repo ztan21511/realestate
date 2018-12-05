@@ -6,7 +6,7 @@ library(ggplot2)
 
 wa_rent_data <-
     fread('data/Rent Price/Neighborhood_MedianRentalPrice_AllHomes.csv') %>%
-    filter(State == 'WA' & CountyName == 'King County')
+    filter(State == 'WA')
 neighborhoods_rent <- wa_rent_data$RegionName %>% unique()
 
 wa_sales_data <-
