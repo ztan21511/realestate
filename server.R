@@ -115,7 +115,7 @@ server <- function (input, output) {
     # Another way to get date range, might give it a try
     output$timeRangeOut <- renderUI(dateRangeInput('dateRange',
                                     label = 'Date range input: yyyy-mm-dd',
-                                    start = Sys.Date() - 2, end = Sys.Date() + 2
+                                    start = "2016-10-1", end = "2018-10-1"
                            )
     )
 
