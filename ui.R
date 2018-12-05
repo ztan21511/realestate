@@ -48,6 +48,7 @@ ui <- navbarPage('Exploring real estate price variations in WA',
                                            trend line graph to indicate the overall
                                            trend combining all selected neighborhoods"),
                                   tags$a("Zillow Data", href="https://www.zillow.com/research/data"),
+                                  br(),
                                   tags$a("Source Code", href = "https://github.com/ztan21511/final-project-info201")
                             ),
 
