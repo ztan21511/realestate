@@ -20,17 +20,12 @@ spd_mcpp_neighborhoods <- st_read(dsn='data/Seattle Police Micro-Community Polic
 
 neighborhoodAvgSale <- read.csv("data/neighborhoodAvgSale.csv", stringsAsFactors=FALSE)
 
+#was using these to provide select options to the user, but the file and filter
+#times were rather slow
 #types <- c(rbind(data.frame(val="All"), data.frame(val=levels(factor(neighborhoodAvgSale$HumanReadablePropertyType)))))
 
 #classes <- c(rbind(data.frame(val="All"), data.frame(val=levels(factor(neighborhoodAvgSale$HumanReadablePropertyClass)))))
 
-#OFM
-#seattleDemographics <- fread("data/sade_all_2000_to_2010/sade_all_2000_to_2010.csv", stringsAsFactors = FALSE) %>%
-#  filter( ) %>% 
-#  mutate( begin_year=2000, end_year=2010) %>% 
-#  merge( fread("data/sade_all_2010_to_2017/sade_all_2010_to_2017.csv", stringsAsFactors = FALSE) %>%
-#    filter() %>% 
-#    mutate(begin_year=2010, end_year=2017))
 
 all_neighborhoods <- unique(c(neighborhoods_sales, neighborhoods_rent))
 both_neighborhoods <- intersect(neighborhoods_sales, neighborhoods_rent)
@@ -164,6 +159,7 @@ server <- function (input, output) {
     })
 
 
+    #allow the user to select a year of avg sales prices for neighborhoods
     changeAnimation <- reactive({
       #print(input$frameWindow)
       sliderInput("animation",
@@ -177,10 +173,13 @@ server <- function (input, output) {
       
     })
     
+    #provide year slider to ui
     output$valueYrSlider <- renderUI({
       changeAnimation()
     })
     
+    #these selects allowed the user to select the property class and type,
+    #refer to those csvs and script to generate them for desc source
     #output$PropertyTypeSelect <- renderUI({
     #  selectInput("TypeSelect", label=h3("Property Type"),
     #              choices=types,
@@ -195,15 +194,24 @@ server <- function (input, output) {
     #              selectize=FALSE)
     #})
     
+    #plot the mcpp based map of neighborhoods, colored by avg sales price 
+    #during a given year
     output$ggplotMap <- renderPlot({
       
+      #require that the input slider exist and its data be available here
       req(input$animation)
+      
+      #require selects
       #req(input$TypeSelect)
       #req(input$ClassSelect)
       
+      #Provide a 3 year window
       YrAvgSale <- neighborhoodAvgSale %>% 
         filter(Yr > input$animation-1 & Yr < input$animation+1)
       
+      
+        #work on the filtering mechanism to allow the user to see
+        # sales by property type and class (e.g. residential, e.g. improved )
         #if(input$TypeSelect=="All"){
         #  print("all")
         #  YrAvgSale <- YrAvgSale %>%
@@ -224,9 +232,11 @@ server <- function (input, output) {
         #    filter(HumanReadablePropertyClass == input$ClassSelect)
         #}
           
+        #join the sales data to the neighboorhood geometry
         YrAvgSale <- spd_mcpp_neighborhoods %>% 
           left_join(YrAvgSale, by=c("name"="name"))
         
+        #plot neighborhood geometry, fill by avg sale price
         ggplot() +
           geom_sf(data=YrAvgSale, aes(fill=AvgSlPr))
           #geom_sf(data=spd_mcpp_neighborhoods)
