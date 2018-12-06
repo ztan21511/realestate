@@ -1,0 +1,8 @@
+"","ID","HumanReadablePropertyType"
+"1",0,"Unknown"
+"2",1,"Land only"
+"3",2,"Land with new building"
+"4",3,"Land with previously used building"
+"5",4,"Land with mobile home"
+"6",5,"Timber only"
+"7",6,"Building only"

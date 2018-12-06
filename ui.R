@@ -1,8 +1,6 @@
 # Set-Up
 
 library(shiny)
-library(leaflet)
-
 #-------------------------------------------------------------------------------------------#
 #-------------------------------------------------------------------------------------------#
 
@@ -10,6 +8,9 @@ library(leaflet)
 
 ui <- navbarPage('Exploring real estate price variations in WA',
                   id = "conditionedPanels",
+                 header=tags$style(type="text/css",
+                                   ".recalculating {opacity: 0.75;}"), 
+                 
                   tabPanel("Real Estate Statistics",
                             sidebarLayout(
                             sidebarPanel(
@@ -67,8 +68,21 @@ ui <- navbarPage('Exploring real estate price variations in WA',
                             )
                         )
                   ),
-
-                  tabPanel("Leaflet Map",
-                           leafletOutput("Map goes here")
+                  tabPanel("Price History and Prediction Map",
+                           
+                           sidebarPanel(uiOutput("valueYrSlider")#,
+                                        #uiOutput("PropertyClassSelect"),
+                                        #uiOutput("PropertyTypeSelect")
+                                        ),
+                           #leafletOutput("seattlePriceMap"),
+                           mainPanel(tags$p('This map plots historical King County Assessor
+                                              sales price data summaries for Micro Community Policing Plan Neighborhoods.
+                                              This data is created from spatial joins between MCPP data from the SPD,
+                                            King County GIS Shapefiles for parcels, and Assessor Sales Price data by parcel.'),
+                             plotOutput("ggplotMap", height="600px", width="400px"))
+                           
+                           
+                           
                   )
+                    
 )

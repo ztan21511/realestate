@@ -1,24 +1,36 @@
-
-
-
 # Set up
 library(dplyr)
 library(shiny)
 library(data.table)
 library(tidyr)
 library(ggplot2)
-library(leaflet)
+library(sf)
+
 wa_rent_data <-
     fread('data/Rent Price/Neighborhood_MedianRentalPrice_AllHomes.csv') %>%
     filter(State == 'WA')
 neighborhoods_rent <- wa_rent_data$RegionName %>% unique()
 
-
-
 wa_sales_data <-
     fread('data/Home Values/Sale_Prices_Neighborhood.csv') %>%
     filter(StateName == 'Washington')
 neighborhoods_sales <- wa_sales_data$RegionName %>% unique()
+
+spd_mcpp_neighborhoods <- st_read(dsn='data/Seattle Police Micro-Community Policing Plans Neighborhoods/geo_export_29a19543-7dda-45bf-99f2-2be3980bb1e9.shp', stringsAsFactors = FALSE)
+
+neighborhoodAvgSale <- read.csv("data/neighborhoodAvgSale.csv", stringsAsFactors=FALSE)
+
+#types <- c(rbind(data.frame(val="All"), data.frame(val=levels(factor(neighborhoodAvgSale$HumanReadablePropertyType)))))
+
+#classes <- c(rbind(data.frame(val="All"), data.frame(val=levels(factor(neighborhoodAvgSale$HumanReadablePropertyClass)))))
+
+#OFM
+#seattleDemographics <- fread("data/sade_all_2000_to_2010/sade_all_2000_to_2010.csv", stringsAsFactors = FALSE) %>%
+#  filter( ) %>% 
+#  mutate( begin_year=2000, end_year=2010) %>% 
+#  merge( fread("data/sade_all_2010_to_2017/sade_all_2010_to_2017.csv", stringsAsFactors = FALSE) %>%
+#    filter() %>% 
+#    mutate(begin_year=2010, end_year=2017))
 
 all_neighborhoods <- unique(c(neighborhoods_sales, neighborhoods_rent))
 both_neighborhoods <- intersect(neighborhoods_sales, neighborhoods_rent)
@@ -27,11 +39,6 @@ both_neighborhoods <- intersect(neighborhoods_sales, neighborhoods_rent)
 #-------------------------------------------------------------------------#
 
 # Functions:
-
-## full_date_range <- names(wa_sales_data) %>%
-##     tail(-4) %>%
-##     paste0('-01') %>%
-##     as.Date(format='%Y-%m-%d')
 
 get_prices_for_neighboorhoods <- function (data, list_of_regions, date) {
     result <- data.frame(stringsAsFactors=FALSE)
@@ -156,11 +163,79 @@ server <- function (input, output) {
         render_plot(point, kilo=FALSE)
     })
 
-    output$`Map goes here` <- renderLeaflet(
-      leaflet() %>%
-        setView(lng = -122.335167, lat = 47.608013, zoom = 11) %>%
-        addTiles()
-    )
+
+    changeAnimation <- reactive({
+      #print(input$frameWindow)
+      sliderInput("animation",
+                  "Year",
+                  min = min(neighborhoodAvgSale$Yr),
+                  max = max(neighborhoodAvgSale$Yr),
+                  value = 2018,
+                  step = 1,
+                  sep ="",
+                  animate = animationOptions(interval=2000, loop=TRUE))
+      
+    })
+    
+    output$valueYrSlider <- renderUI({
+      changeAnimation()
+    })
+    
+    #output$PropertyTypeSelect <- renderUI({
+    #  selectInput("TypeSelect", label=h3("Property Type"),
+    #              choices=types,
+    #              selected=types[1],
+    #              selectize=FALSE)
+    #})
+    
+    #output$PropertyClassSelect <- renderUI({
+    #  selectInput("ClassSelect", label=h3("Property Class"),
+    #              choices=classes,
+    #              selected=classes[1],
+    #              selectize=FALSE)
+    #})
+    
+    output$ggplotMap <- renderPlot({
+      
+      req(input$animation)
+      #req(input$TypeSelect)
+      #req(input$ClassSelect)
+      
+      YrAvgSale <- neighborhoodAvgSale %>% 
+        filter(Yr > input$animation-1 & Yr < input$animation+1)
+      
+        #if(input$TypeSelect=="All"){
+        #  print("all")
+        #  YrAvgSale <- YrAvgSale %>%
+        #    group_by(name) %>% 
+        #    summarize(AvgSlPr = mean(AvgSlPr))
+          
+        #}else{
+        #  YrAvgSale <- YrAvgSale %>% 
+        #    filter(HumanReadablePropertyType == input$TypeSelect)
+        #}
+      
+        #if(input$ClassSelect=="All"){
+        #  YrAvgSale <- YrAvgSale %>% 
+        #    group_by(name, HumanReadablePropertyType) %>% 
+        #    summarize(AvgSlPr = mean(AvgSlPr))
+        #}else{
+        #  YrAvgSale <- YrAvgSale %>% 
+        #    filter(HumanReadablePropertyClass == input$ClassSelect)
+        #}
+          
+        YrAvgSale <- spd_mcpp_neighborhoods %>% 
+          left_join(YrAvgSale, by=c("name"="name"))
+        
+        ggplot() +
+          geom_sf(data=YrAvgSale, aes(fill=AvgSlPr))
+          #geom_sf(data=spd_mcpp_neighborhoods)
+    })
+    
+    
+    output$test <- renderText({
+        "Hello world!"
+    })
 }
 
 ## Histogram (we don't have enough data to plot this)
