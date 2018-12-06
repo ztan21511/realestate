@@ -1,11 +1,10 @@
+# Set up
 library(dplyr)
 library(shiny)
 library(data.table)
 library(tidyr)
 library(ggplot2)
 library(sf)
-library(leaflet)
-library(rgeos)
 
 wa_rent_data <-
     fread('data/Rent Price/Neighborhood_MedianRentalPrice_AllHomes.csv') %>%
@@ -36,12 +35,12 @@ neighborhoodAvgSale <- read.csv("data/neighborhoodAvgSale.csv", stringsAsFactors
 all_neighborhoods <- unique(c(neighborhoods_sales, neighborhoods_rent))
 both_neighborhoods <- intersect(neighborhoods_sales, neighborhoods_rent)
 
-## full_date_range <- names(wa_sales_data) %>%
-##     tail(-4) %>%
-##     paste0('-01') %>%
-##     as.Date(format='%Y-%m-%d')
+#-------------------------------------------------------------------------#
+#-------------------------------------------------------------------------#
 
-get_prices_for_neighboorhoods <- function (data, list_of_regions) {
+# Functions:
+
+get_prices_for_neighboorhoods <- function (data, list_of_regions, date) {
     result <- data.frame(stringsAsFactors=FALSE)
     if ('(Select All)' %in% list_of_regions) {
         list_of_regions <- unique(data$RegionName)
@@ -52,7 +51,7 @@ get_prices_for_neighboorhoods <- function (data, list_of_regions) {
             filter(RegionName == name) %>%
             head(1)
         point <- row %>%
-            select(`2016-10`:`2018-10`) %>%
+            select(date[1]:date[2]) %>%
             gather(year_month, price) %>%
             mutate(region=name)
         result <- rbind(result, point)
@@ -102,6 +101,10 @@ render_ribbon <- function (data, ylabel) {
         theme(axis.text.x = element_text(angle = 45, hjust = 1))
 }
 
+#----------------------------------------------------------------------------#
+#----------------------------------------------------------------------------#
+
+#Shiny App Server Side:
 
 server <- function (input, output) {
     get_all_names <- reactive({
@@ -129,17 +132,25 @@ server <- function (input, output) {
     ##                 value=c(min_date, max_date),
     ##                 timeFormat='%Y-%m')
     ## })
-    
+
     # Another way to get date range, might give it a try
     output$timeRangeOut <- renderUI(dateRangeInput('dateRange',
                                     label = 'Date range input: yyyy-mm-dd',
-                                    start = Sys.Date() - 2, end = Sys.Date() + 2
+                                    start = "2016-10-1", end = "2018-10-1",
+                                    min = "2010-2-1", max = "2018-10-31",
+                                    format = "yyyy-mm", startview = "year"
                            )
     )
 
     get_points <- reactive({
         get_prices_for_neighboorhoods(wa_sales_data,
-                                      input$neighborhoodIn)
+                                      input$neighborhoodIn, format(as.Date(input$dateRange), "%Y-%m")
+                                     )
+    })
+
+    get_points_rent <- reactive({
+        get_prices_for_neighboorhoods(wa_rent_data,
+                                      input$neighborhoodIn, format(as.Date(input$dateRange), "%Y-%m"))
     })
 
     output$salesPlot <- renderPlot({
@@ -148,20 +159,11 @@ server <- function (input, output) {
     })
 
     output$rentPlot <- renderPlot({
-        point <- get_prices_for_neighboorhoods(wa_rent_data,
-                                               input$neighborhoodIn)
-        use_aggregate <- length(input$neighborhoodIn) > 6
-        render_plot(point, use_aggregate, kilo=FALSE)
+        point <- get_points_rent()
+        render_plot(point, kilo=FALSE)
     })
 
-    output$valueMap <- renderPlot({
-      #leaflet() %>%
-      #  addTiles() %>% 
-      #  fitBounds(~min())
-      
-      
-    })
-    
+
     changeAnimation <- reactive({
       #print(input$frameWindow)
       sliderInput("animation",
