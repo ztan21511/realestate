@@ -3,6 +3,8 @@
 
 Ken Long, Yifeng Liu, Yinzi Wu, Zachary Tan
 
+Available [online](https://kml27.shinyapps.io/final-project-info201/)
+
 The main datasets we will be working with are Zillow Research, SPD Crime Data, County Clerk Records, Census demographic data, WalkScore, and Google Maps/Places to help us understand what factors affect real estate prices in Seattle. Zillow collects pricing and other housing related data as part of its business model as a real estate resource. WalkScore allows users to make a limited number of calls (5000/day) to their API, so we can try before we buy their service for a larger project. Google Maps/Places allows a limited number of API calls for some of their APIs on the same type of free trial model. Some resources are public record. SPD makes legally required data about crimes public, which allows other agencies and citizens to evaluate the work they're doing. County Clerk records provide information about what is happening in a city, with individuals and organizations. Census records help the government to identify the "state of the nation" (who they're serving) such as diversity, needs, progress, fairness/legality and seats in the House of Representatives.
 
 Our stakeholders will be anyone who is, or will be home buyers, renters, property owners, developers and realtors. We might answer questions for our audience like: What most affects real estate prices in Seattle? What kind of changes in prices they expect to see? Is there a seasonal difference? For example, is renting in summer more expensive? Where will new development projects start? What might their property be worth in the future? Where should they buy (undeveloped) property?
