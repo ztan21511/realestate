@@ -79,7 +79,8 @@ ui <- navbarPage('Exploring real estate price variations in WA',
                            mainPanel(tags$p('This map plots historical King County Assessor
                                               sales price data summaries for Micro Community Policing Plan Neighborhoods.
                                               This data is created from spatial joins between MCPP data from the SPD,
-                                            King County GIS Shapefiles for parcels, and Assessor Sales Price data by parcel.'),
+                                            King County GIS Shapefiles for parcels, and Assessor Sales Price data by parcel.
+                                            It displays values for +- 1 year around the selected year since some older years have few sales.'),
                              plotOutput("ggplotMap", height="600px", width="400px"))
                            
                            
